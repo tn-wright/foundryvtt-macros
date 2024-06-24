@@ -38,7 +38,37 @@ if (!valid) {
 
 warpgate.grid.highlightRing({ name });
 
-await tentacle.document.update({ x, y });
+await CanvasAnimation.animate(
+  [
+      {
+          parent: placeable.mesh,
+          attribute: "alpha",
+          to: 0,
+      },
+  ],
+  {
+      duration: 300,
+      easing: "easeOutCircle",
+  },
+);
+
+await tentacle.document.update({ x: x, y: y, elevation: position.elevation }, { animate: false });
+
+//fade in token
+await CanvasAnimation.animate(
+  [
+      {
+          parent: placeable.mesh,
+          attribute: "alpha",
+          from: 0,
+          to: originalAlpha,
+      },
+  ],
+  {
+      duration: 300,
+      easing: "easeInCircle",
+  },
+);
 
 
 
