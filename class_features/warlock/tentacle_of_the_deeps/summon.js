@@ -53,8 +53,8 @@ new Sequence()
   .belowTokens()
   .scale(0.5)
   .scaleIn(0.1, 200, {ease: "easeOutCubic"})
-  .scaleOut(0.1, 200, {ease: "easeInCubic"})
-  .duration(1500)
+  .scaleOut(0.1, 400, {ease: "easeInCubic"})
+  .duration(1000)
   .play();
 
 let optionConfig = { controllingActor: actor };
