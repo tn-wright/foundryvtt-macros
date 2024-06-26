@@ -1,134 +1,139 @@
-const tentacle = game.scenes.current.tokens.find(tkn => tkn.baseActor.name === "Tentacle of the Deep")._object;
+const moveRange = item.system.range.value;
 
-const name = "rangefinder";
-const size = 6;
-const rings = 1;
-const colors = [0x00ff00];
-
-const highlights = warpgate.grid.highlightRing(
-  { x: tentacle.x, y: tentacle.y, rings, name },
-  { size, colors, clear: true, lifetime: 0 }
+let tentacle = game.scenes.current.tokens.find(
+  (tkn) => tkn.baseActor.name === "Tentacle of the Deeps"
 );
 
-console.log(highlights);
+if (!tentacle) {
+  ui.notifications.warn("A Tentacle of the Deeps must be summoned first");
+  return;
+}
 
-const loc = await warpgate.crosshairs.show({
+tentacle = tentacle.object;
+
+// Handle new location selection
+let crosshairDistance = 0;
+const checkDistance = async (crosshairs) => {
+  while (crosshairs.inFlight) {
+    await warpgate.wait(100);
+
+    const pathMeasure = canvas.grid.measurePath([
+      tentacle.center,
+      crosshairs.document,
+    ]);
+    const distance = pathMeasure.distance;
+
+    if (crosshairDistance !== distance) {
+      crosshairDistance = distance;
+      if (distance > moveRange) {
+        crosshairs.icon = "icons/svg/hazard.svg";
+      } else {
+        crosshairs.icon = item.img;
+      }
+
+      crosshairs.draw();
+      crosshairs.label = `${distance} ft.`;
+    }
+  }
+};
+
+let crosshairConfig = {
   size: 1,
   icon: item.img,
+  label: "0 ft.",
   tag: "totd",
   snappingBehavior: {
     mode: CONST.GRID_SNAPPING_MODES.CENTER,
   },
   rememberControlled: true,
-});
-
-if (loc.cancelled) {
-  warpgate.grid.highlightRing({ name });
-  return
 };
 
-const { x, y } = canvas.grid.getSnappedPoint({x: loc.x, y: loc.y}, {mode: CONST.GRID_SNAPPING_MODES.VERTEX});
+let crosshairPosition = await warpgate.crosshairs.show(crosshairConfig, {
+  show: checkDistance,
+});
 
-const valid = highlights.find((range) => range.x == x && range.y == y);
-if (!valid) {
-  ui.notifications.error("Destination outside range!");
-  warpgate.grid.highlightRing({ name });
+if (crosshairPosition.cancelled || crosshairDistance > moveRange) {
+  console.log(`TOTD MACRO: Cancelling`);
   return;
 }
 
-warpgate.grid.highlightRing({ name });
-
+// Fade out the token
 await CanvasAnimation.animate(
   [
-      {
-          parent: placeable.mesh,
-          attribute: "alpha",
-          to: 0,
-      },
+    {
+      parent: tentacle.mesh,
+      attribute: "alpha",
+      to: 0,
+    },
   ],
   {
-      duration: 300,
-      easing: "easeOutCircle",
-  },
+    duration: 300,
+    easing: "easeOutCircle",
+  }
 );
 
-await tentacle.document.update({ x: x, y: y, elevation: position.elevation }, { animate: false });
+// Move the token with effect
+let movePosition = canvas.grid.getTopLeftPoint(crosshairPosition);
+await tentacle.document.update(movePosition, { animate: false });
+new Sequence()
+  .effect()
+  .file("jb2a.arms_of_hadar.dark_purple")
+  .atLocation(crosshairPosition)
+  .belowTokens()
+  .randomRotation()
+  .scale(0.5)
+  .scaleIn(0.1, 200, { ease: "easeOutCubic" })
+  .scaleOut(0.1, 400, { ease: "easeInCubic" })
+  .duration(1000)
+  .play();
 
-//fade in token
+// Fade the token back in
 await CanvasAnimation.animate(
   [
-      {
-          parent: placeable.mesh,
-          attribute: "alpha",
-          from: 0,
-          to: originalAlpha,
-      },
+    {
+      parent: tentacle.mesh,
+      attribute: "alpha",
+      from: 0,
+      to: 1,
+    },
   ],
   {
-      duration: 300,
-      easing: "easeInCircle",
-  },
+    duration: 300,
+    easing: "easeInCircle",
+  }
 );
 
+const attackDialog = new Dialog({
+  title: "Attack?",
+  content:
+    "<p>Would you like to perform an attack as part of the move?</p><br><p>Make sure you have a target selected before attacking!</p><br>",
+  buttons: {
+    yes: {
+      icon: "<i class='fa-solid fa-check'></i>",
+      label: "Yes",
+      callback: () => {
+        let target = game.user.targets.first();
 
+        if (!target) {
+          ui.notifications.warn("You must select a target before attacking");
+          return;
+        }
 
+        const attackItem = tentacle.actor
+          .getEmbeddedCollection("items")
+          .find((i) => i.name === "Attack");
 
-// const pushRange = 30; //feet
-// const tentacle = game.scenes.current.tokens.find(tkn => tkn.baseActor.name === "Tentacle of the Deep")._object;
+        attackItem.use();
+      },
+    },
+    no: {
+      icon: "<i class='fa-solid fa-xmark'></i>",
+      label: "No",
+      callback: () => {
+        return;
+      },
+    },
+  },
+});
 
-// /* show valid range for bump */
-// const {distance} = canvas.scene.grid;
-
-// console.log(tentacle.document.width + pushRange);
-
-// warpgate.crosshairs.show({
-//     lockSize: true,
-//     lockPosition: true,
-//     size: tentacle.document.width + pushRange + 1,
-//     tag: 'range',
-//     label: 'Valid Area',
-//     fillColor: game.user.color,
-//     fillAlpha: 0.5,
-//     drawOutline: true,
-//     borderColor: game.user.color,
-//     ...tentacle.center,
-// })
-
-//  /* select destination (not verified within distance) */
-// let {x, y, cancelled} = await warpgate.crosshairs.show({
-//     size: 1,
-//     icon: item.img,
-//     drawIcon: true,
-//     drawOutline: false,
-//     tag: 'loc',
-//     snappingBehavior: { mode: CONST.GRID_SNAPPING_MODES.CENTER }
-// }, {show: (loc) => loc.initialLayer = warpgate.crosshairs.getTag('range').initialLayer});
-
-// /* if an actual move, mutate location */
-// if (x != tentacle.center.x && 
-//     y != tentacle.center.y &&
-//     !cancelled) {
-
-//     /* Visual feedback for observers */
-//     warpgate.plugin.notice(tentacle.center, {ping:'pulse', receivers: warpgate.USERS.ALL})
-//     warpgate.plugin.notice({x,y}, {ping:'chevron', receivers: warpgate.USERS.ALL})
-    
-//     /* offset destination to top left corner */
-//     x -= tentacle.w/2;
-//     y -= tentacle.h/2;
-
-//     /* move the target to the new location */
-//     await warpgate.mutate(
-//         tentacle.document,
-//         {token: {x, y}},
-//         {},
-//         {
-//             permanent: true,
-//             name: 'Tentacle of the Deeps: Move',
-//             description: `Moving ${tentacle.document.name} up to ${pushRange} ft.`,
-//         }
-//     )
-// } else {
-//     /* on a cancel, kill the range indicator as well */
-//     warpgate.crosshairs.getTag('range').inFlight = false;
-// }
+attackDialog.render(true);
