@@ -59,17 +59,25 @@ const casterActor = item.parent;
 const casterToken = casterActor.getActiveTokens()[0];
 const casterSpeaker = ChatMessage.getSpeaker(casterToken);
 
-const currentSeason = casterActor
-  .getEmbeddedCollection("items")
+const currentSeason = casterActor.items
   .find((i) => i.name.match(/Season - /))
   .name.split(" ")[2];
+
+let teleportToken = casterToken;
 
 // Before teleport season effects
 
 if (currentSeason === "Spring") {
+  // Ask if teleporting another create or not
+
+  // If yes, get the target and teleport them instead
+  // May want to check that the target is an ally, as they have to be willing
+  // Then print a special message that someone else is getting teleported
   console.log("Spring");
 } else if (currentSeason === "Winter") {
-  console.log("Winter");
+  // Check if they want to use the ability
+  // if yes, get the target and make them roll a wisdom save
+  // If they fail, mark them as frightened for 1 round
 }
 
 let position = await new Portal()
@@ -81,13 +89,13 @@ let position = await new Portal()
 
 position = canvas.grid.getTopLeftPoint(position);
 
-const originalAlpha = casterToken.mesh.alpha;
+const originalAlpha = teleportToken.mesh.alpha;
 
 // Play disappearance effect
 new Sequence()
   .effect()
   .file("jb2a.misty_step.01.green")
-  .atLocation(casterToken.center)
+  .atLocation(teleportToken.center)
   .scale(0.5)
   .duration(3000)
   .play();
@@ -96,7 +104,7 @@ new Sequence()
 await CanvasAnimation.animate(
   [
     {
-      parent: casterToken.mesh,
+      parent: teleportToken.mesh,
       attribute: "alpha",
       to: 0,
     },
@@ -108,7 +116,7 @@ await CanvasAnimation.animate(
   }
 );
 
-await casterToken.document.update(
+await teleportToken.document.update(
   { x: position.x, y: position.y, elevation: position.elevation },
   { animate: false }
 );
@@ -126,7 +134,7 @@ new Sequence()
 await CanvasAnimation.animate(
   [
     {
-      parent: casterToken.mesh,
+      parent: teleportToken.mesh,
       attribute: "alpha",
       from: 0,
       to: originalAlpha,
@@ -146,5 +154,12 @@ if (currentSeason === "Summer") {
     speaker: casterSpeaker,
   });
 } else if (currentSeason === "Autumn") {
-  console.log("Autumn");
+  // Check if wants to use the feature
+  // If yes, get 2 targets
+  // Wisdom save for the targets, charmed if they fail
+  // Charmed for 1 minute or until dealt damage
+  Chatmessage.create({
+    content: "",
+    speaker: casterSpeaker,
+  });
 }
