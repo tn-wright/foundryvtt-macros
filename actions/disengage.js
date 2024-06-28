@@ -1,3 +1,14 @@
-const userActor = item.parent;
+const userActor = item.actor;
+await userActor.toggleStatusEffect("disengage", { active: true });
 
-userActor.toggleStatusEffect("disengage");
+const hookId = Hooks.on(
+  "combatTurnChange",
+  async (combat, oldTurn, newTurn) => {
+    if (userActor.name !== canvas.scene.tokens.get(newTurn.tokenId).name) {
+      return;
+    }
+
+    await userActor.toggleStatusEffect("disengage", { active: false });
+    Hooks.off("combatTurnChange", hookId);
+  }
+);
