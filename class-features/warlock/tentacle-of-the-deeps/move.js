@@ -78,9 +78,9 @@ const attackDialog = new Dialog({
           return;
         }
 
-        const attackItem = tentacle.actor
-          .getEmbeddedCollection("items")
-          .find((i) => i.name === "Attack");
+        const attackItem = tentacle.actor.items.find(
+          (i) => i.name === "Attack"
+        );
 
         attackItem.use();
       },

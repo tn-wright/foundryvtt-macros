@@ -82,11 +82,11 @@ await CanvasAnimation.animate(
   }
 );
 
-await tentacle.update({ alpha: 1 }, {animate: false});
+await tentacle.update({ alpha: 1 }, { animate: false });
 
-const tentacleAttack = tentacle.object.actor
-  .getEmbeddedCollection("items")
-  .find((i) => i.name === "Attack");
+const tentacleAttack = tentacle.object.actor.items.find(
+  (i) => i.name === "Attack"
+);
 
 // Check if there should be an attack
 const attackDialog = new Dialog({

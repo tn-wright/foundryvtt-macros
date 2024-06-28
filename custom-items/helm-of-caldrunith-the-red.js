@@ -37,9 +37,7 @@ const logMessage = (level, func, msg) => {
 
 const getObjectFromActor = (objName) => {
   logMessage("Debug", "getObjectFromActor", `Getting ${objName} from actor`);
-  return actor
-    .getEmbeddedCollection("items")
-    .find((obj) => obj.name.trim() === objName);
+  return actor.items.find((obj) => obj.name.trim() === objName);
 };
 
 const getFlagOrDefault = async (object, flag, defaultVal) => {
@@ -118,13 +116,8 @@ if (
       return;
     }
 
-    logMessage(
-      "Debug",
-      "addSpellToActor",
-      `Adding spells to actor`
-    );
+    logMessage("Debug", "addSpellToActor", `Adding spells to actor`);
     if (item.system.equipped && item.system.attuned) {
-
       // Aganazzar's Scorcher
       if (!getObjectFromActor(RED_SPELL_ONE_NAME)) {
         logMessage(
@@ -237,14 +230,22 @@ if (
       if (typeof spellClone !== "undefined" && spellClone !== null) {
         await actor.deleteEmbeddedDocuments("Item", [spellClone.id]);
       } else {
-        logMessage("Warn", "removeSpellFromActor", `Unable to find ${RED_SPELL_ONE_NAME} on actor`)
+        logMessage(
+          "Warn",
+          "removeSpellFromActor",
+          `Unable to find ${RED_SPELL_ONE_NAME} on actor`
+        );
       }
 
       spellClone = getObjectFromActor(RED_SPELL_TWO_NAME);
       if (typeof spellClone !== "undefined" && spellClone !== null) {
         await actor.deleteEmbeddedDocuments("Item", [spellClone.id]);
       } else {
-        logMessage("Warn", "removeSpellFromActor", `Unable to find ${RED_SPELL_TWO_NAME} on actor`)
+        logMessage(
+          "Warn",
+          "removeSpellFromActor",
+          `Unable to find ${RED_SPELL_TWO_NAME} on actor`
+        );
       }
     }
   });
@@ -265,17 +266,9 @@ if (
     }
 
     // Get the listener IDs for this item
-    let updateHookId = await getFlagOrDefault(
-      item,
-      RED_UPDATE_HOOK_ID_KEY,
-      -1
-    );
+    let updateHookId = await getFlagOrDefault(item, RED_UPDATE_HOOK_ID_KEY, -1);
 
-    let deleteHookid = await getFlagOrDefault(
-      item,
-      RED_DELETE_HOOK_ID_KEY,
-      -1
-    );
+    let deleteHookid = await getFlagOrDefault(item, RED_DELETE_HOOK_ID_KEY, -1);
 
     // Remove the hooks
     Hooks.off("updateItem", updateHookId);
@@ -297,17 +290,19 @@ if (
   item.setFlag(RED_FLAG_SCOPE, RED_DELETE_HOOK_ID_KEY, deleteHookId);
 }
 
-if(item.system.equipped && item.system.attuned) {
+if (item.system.equipped && item.system.attuned) {
   // If the item is equipped and attuned, use the ability
   useAbility();
 } else {
   // Otherwise, do nothing and refund the spend resource
-  ui.notifications.warn(`${item.name} must be equipped and attuned to use its ability...`);
+  ui.notifications.warn(
+    `${item.name} must be equipped and attuned to use its ability...`
+  );
   await item.update({
     system: {
       uses: {
-        value: item.system.uses.value + 1
-      }
-    }
+        value: item.system.uses.value + 1,
+      },
+    },
   });
 }
