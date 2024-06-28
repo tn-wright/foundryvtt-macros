@@ -11,53 +11,13 @@ if (!tentacle) {
 
 tentacle = tentacle.object;
 
-// Handle new location selection
-let crosshairDistance = 0;
-const checkDistance = async (crosshairs) => {
-  while (crosshairs.inFlight) {
-    await warpgate.wait(100);
+const selectedPosition = await new Portal()
+  .origin(tentacle.center)
+  .color(game.user.color)
+  .texture(item.img)
+  .range(moveRange)
+  .pick();
 
-    const pathMeasure = canvas.grid.measurePath([
-      tentacle.center,
-      crosshairs.document,
-    ]);
-    const distance = pathMeasure.distance;
-
-    if (crosshairDistance !== distance) {
-      crosshairDistance = distance;
-      if (distance > moveRange) {
-        crosshairs.icon = "icons/svg/hazard.svg";
-      } else {
-        crosshairs.icon = item.img;
-      }
-
-      crosshairs.draw();
-      crosshairs.label = `${distance} ft.`;
-    }
-  }
-};
-
-let crosshairConfig = {
-  size: 1,
-  icon: item.img,
-  label: "0 ft.",
-  tag: "totd",
-  snappingBehavior: {
-    mode: CONST.GRID_SNAPPING_MODES.CENTER,
-  },
-  rememberControlled: true,
-};
-
-let crosshairPosition = await warpgate.crosshairs.show(crosshairConfig, {
-  show: checkDistance,
-});
-
-if (crosshairPosition.cancelled || crosshairDistance > moveRange) {
-  console.log(`TOTD MACRO: Cancelling`);
-  return;
-}
-
-// Fade out the token
 await CanvasAnimation.animate(
   [
     {
@@ -72,13 +32,13 @@ await CanvasAnimation.animate(
   }
 );
 
-// Move the token with effect
-let movePosition = canvas.grid.getTopLeftPoint(crosshairPosition);
+// Move the token
+const movePosition = canvas.grid.getTopLeftPoint(selectedPosition);
 await tentacle.document.update(movePosition, { animate: false });
 new Sequence()
   .effect()
   .file("jb2a.arms_of_hadar.dark_purple")
-  .atLocation(crosshairPosition)
+  .atLocation(tentacle.center)
   .belowTokens()
   .randomRotation()
   .scale(0.5)
@@ -87,7 +47,6 @@ new Sequence()
   .duration(1000)
   .play();
 
-// Fade the token back in
 await CanvasAnimation.animate(
   [
     {
