@@ -70,14 +70,75 @@ let teleportToken = casterToken;
 if (currentSeason === "Spring") {
   // Ask if teleporting another create or not
 
+  await Dialog.confirm({
+    title: "Fey Step - Spring",
+    content: `<p>Are you teleporting another creature?</p><br>
+    <p>If yes, target that creatre before proceeding...</p>`,
+    yes: () => {
+      teleportToken = game.user.targets.first();
+    },
+    no: () => {
+      return;
+    },
+    defaultYes: false,
+  }).render();
+
   // If yes, get the target and teleport them instead
   // May want to check that the target is an ally, as they have to be willing
   // Then print a special message that someone else is getting teleported
   console.log("Spring");
 } else if (currentSeason === "Winter") {
-  // Check if they want to use the ability
-  // if yes, get the target and make them roll a wisdom save
-  // If they fail, mark them as frightened for 1 round
+  await Dialog.confirm({
+    title: "Fey Step - Winter",
+    content: `<p>Will you attempt to frighten a creature within 5 feet before teleporting?</p><br>
+    <p>If yes, target that creatre before proceeding...</p>`,
+    yes: () => {
+      let frightenTarget = game.user.targets.first();
+
+      if(!frightenTarget) {
+        ui.notifications.warn("The frighten effect requires one target");
+        return;
+      }
+
+      let saveRoll = frightenTarget.actor.rollAbilitySave("wis").total;
+      let saveDC = 8 + casterActor.system.abilities.cha.mod + casterActor.system.attributes.prof;
+
+      if (saveRoll >= saveDC) {
+        // Target saved, print it to chat
+        ChatMessage.create({
+          content: `<p>${frightenTarget.actor.name} was not frightened by Fey Step...</p>`,
+          speaker: casterSpeaker,
+        });
+      } else {
+        // Mark token as freightened
+        await casterActor.toggleStatusEffect("frightened", { active: true });
+       
+        // Register hook to remove the effect after 1 round
+        const hookId = Hooks.on(
+          "combatTurnChange",
+          async (combat, oldTurn, newTurn) => {
+            if (casterActor.name !== canvas.scene.tokens.get(newTurn.tokenId).name) {
+              return;
+            }
+        
+            await casterActor.toggleStatusEffect("frightened", { active: false });
+            // Remove the hook once it runs
+            Hooks.off("combatTurnChange", hookId);
+          }
+        );
+
+        // Print a chat message with the result
+        ChatMessage.create({
+          content: `<p>${frightenTarget.actor.name} has been frightened by Fey Step!</p>`,
+          speaker: casterSpeaker,
+        });
+      }
+    },
+    no: () => {
+      return;
+    },
+    defaultYes: false,
+  }).render();
 }
 
 let position = await new Portal()
