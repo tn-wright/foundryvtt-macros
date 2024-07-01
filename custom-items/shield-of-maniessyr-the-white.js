@@ -31,9 +31,7 @@ const logMessage = (level, func, msg) => {
 
 const getObjectFromActor = (objName) => {
   logMessage("Debug", "getObjectFromActor", `Getting ${objName} from actor`);
-  return actor
-    .getEmbeddedCollection("items")
-    .find((obj) => obj.name.trim() === objName);
+  return actor.items.find((obj) => obj.name.trim() === objName);
 };
 
 const getFlagOrDefault = async (object, flag, defaultVal) => {
@@ -112,13 +110,8 @@ if (
       return;
     }
 
-    logMessage(
-      "Debug",
-      "addSpellToActor",
-      `Adding spells to actor`
-    );
+    logMessage("Debug", "addSpellToActor", `Adding spells to actor`);
     if (item.system.equipped && item.system.attuned) {
-
       // Absorb Elements
       if (!getObjectFromActor(WHITE_SPELL_ONE_NAME)) {
         logMessage(
@@ -177,7 +170,11 @@ if (
       if (typeof spellClone !== "undefined" && spellClone !== null) {
         await actor.deleteEmbeddedDocuments("Item", [spellClone.id]);
       } else {
-        logMessage("Warn", "removeSpellFromActor", `Unable to find ${WHITE_SPELL_ONE_NAME} on actor`)
+        logMessage(
+          "Warn",
+          "removeSpellFromActor",
+          `Unable to find ${WHITE_SPELL_ONE_NAME} on actor`
+        );
       }
     }
   });
@@ -230,17 +227,19 @@ if (
   item.setFlag(WHITE_FLAG_SCOPE, WHITE_DELETE_HOOK_ID_KEY, deleteHookId);
 }
 
-if(item.system.equipped && item.system.attuned) {
+if (item.system.equipped && item.system.attuned) {
   // If the item is equipped and attuned, use the ability
   useAbility();
 } else {
   // Otherwise, do nothing and refund the spend resource
-  ui.notifications.warn(`${item.name} must be equipped and attuned to use its ability...`);
+  ui.notifications.warn(
+    `${item.name} must be equipped and attuned to use its ability...`
+  );
   await item.update({
     system: {
       uses: {
-        value: item.system.uses.value + 1
-      }
-    }
+        value: item.system.uses.value + 1,
+      },
+    },
   });
 }

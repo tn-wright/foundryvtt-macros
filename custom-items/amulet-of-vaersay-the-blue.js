@@ -55,9 +55,7 @@ const logMessage = (level, func, msg) => {
 
 const getObjectFromActor = (objName) => {
   logMessage("Debug", "getObjectFromActor", `Getting ${objName} from actor`);
-  return actor
-    .getEmbeddedCollection("items")
-    .find((obj) => obj.name.trim() === objName);
+  return actor.items.find((obj) => obj.name.trim() === objName);
 };
 
 const getFlagOrDefault = async (object, flag, defaultVal) => {
@@ -137,7 +135,7 @@ if (
     }
 
     let maxActiveEffect = 1;
-    item.getEmbeddedCollection("effects").forEach((effect) => {
+    item.effects.forEach((effect) => {
       if (effect.disabled) {
         return;
       }
@@ -433,7 +431,7 @@ if (
       }
     } else if (!item.system.equipped || !item.system.attuned) {
       let maxActiveEffect = 1;
-      item.getEmbeddedCollection("effects").forEach((effect) => {
+      item.effects.forEach((effect) => {
         if (effect.disabled) {
           return;
         }
@@ -549,7 +547,7 @@ if (
     logMessage("Debug", "removeSpellFromActor", `Removing spells from actor`);
 
     let maxActiveEffect = 1;
-    item.getEmbeddedCollection("effects").forEach((effect) => {
+    item.effects.forEach((effect) => {
       if (effect.disabled) {
         return;
       }
