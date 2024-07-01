@@ -55,6 +55,76 @@ const generateSummerMessage = (dmgAmount) => {
   `;
 };
 
+const setupConditionHooks = (cond, seconds, targetActor) => {
+  // Register hook to remove the effect after 1 round
+  const targetWorldTime = game.time.worldTime + seconds;
+  const condStartingRound = game.combat.round;
+  const condExpireRound = condStartingRound + Math.ceil(seconds / 6);
+
+  let condRoundHookId;
+  let condTimeHookId;
+
+  console.log(
+    `Hooks registered\nTime: ${condTimeHookId}\nRound: ${condRoundHookId}`
+  );
+
+  condRoundHookId = Hooks.on(
+    "combatTurnChange",
+    async (combat, oldTurn, newTurn) => {
+      console.log(
+        `Combat Hook\nTime: ${condTimeHookId}\nRound: ${condRoundHookId}`
+      );
+      // Return early if it isn't the turn of Fey Step's caster
+      if (casterActor.name !== canvas.scene.tokens.get(newTurn.tokenId).name) {
+        return;
+      }
+
+      // If we are in a round before the condition expires, return early
+      if (newTurn.round < condExpireRound) {
+        return;
+      }
+
+      await targetActor.toggleStatusEffect(cond, { active: false });
+
+      // Remove both hooks after the first runs
+      Hooks.off("combatTurnChange", condRoundHookId);
+      Hooks.off("updateWorldTime", condTimeHookId);
+    }
+  );
+
+  console.log(
+    `Hooks registered\nTime: ${condTimeHookId}\nRound: ${condRoundHookId}`
+  );
+
+  condTimeHookId = Hooks.on(
+    "updateWorldTime",
+    async (newTime, delta, options, userId) => {
+      // Don't toggle the effect until we exceed the world time
+      // This will help ensure that during combat, the round hook
+      // will run first
+      console.log(
+        `Time Hook\nTime: ${condTimeHookId}\nRound: ${condRoundHookId}`
+      );
+
+      if (newTime <= targetWorldTime) {
+        return;
+      }
+
+      await targetActor.toggleStatusEffect(cond, {
+        active: false,
+      });
+
+      // Remove both hooks after the first runs
+      Hooks.off("updateWorldTime", condTimeHookId);
+      Hooks.off("combatTurnChange", condRoundHookId);
+    }
+  );
+
+  console.log(
+    `Hooks registered\nTime: ${condTimeHookId}\nRound: ${condRoundHookId}`
+  );
+};
+
 const casterActor = item.parent;
 const casterToken = casterActor.getActiveTokens()[0];
 const casterSpeaker = ChatMessage.getSpeaker(casterToken);
@@ -73,37 +143,49 @@ if (currentSeason === "Spring") {
   await Dialog.confirm({
     title: "Fey Step - Spring",
     content: `<p>Are you teleporting another creature?</p><br>
-    <p>If yes, target that creatre before proceeding...</p>`,
+    <p>If yes, target that creature before proceeding...</p>`,
     yes: () => {
-      teleportToken = game.user.targets.first();
+      let teleTarget = game.user.targets.first();
+
+      if (!teleTarget) {
+        ui.notifications.warn(
+          "You must target the creature you want to teleport..."
+        );
+        return;
+      }
+
+      teleportToken = teleTarget;
+
+      ChatMessage.create({
+        content: `<p>${casterActor.name} is teleporting ${teleportToken.actor.name} with Fey Step instead of themselves</p>`,
+        speaker: casterSpeaker,
+      });
     },
     no: () => {
       return;
     },
     defaultYes: false,
-  }).render();
-
-  // If yes, get the target and teleport them instead
-  // May want to check that the target is an ally, as they have to be willing
-  // Then print a special message that someone else is getting teleported
-  console.log("Spring");
+  });
 } else if (currentSeason === "Winter") {
   await Dialog.confirm({
     title: "Fey Step - Winter",
     content: `<p>Will you attempt to frighten a creature within 5 feet before teleporting?</p><br>
-    <p>If yes, target that creatre before proceeding...</p>`,
-    yes: () => {
-      let frightenTarget = game.user.targets.first();
+    <p>If yes, target that creature before proceeding...</p>`,
+    yes: async () => {
+      const frightenTarget = game.user.targets.first();
 
-      if(!frightenTarget) {
+      if (!frightenTarget) {
         ui.notifications.warn("The frighten effect requires one target");
         return;
       }
 
-      let saveRoll = frightenTarget.actor.rollAbilitySave("wis").total;
-      let saveDC = 8 + casterActor.system.abilities.cha.mod + casterActor.system.attributes.prof;
+      let saveRoll = await frightenTarget.actor.rollAbilitySave("wis");
+      let saveDC =
+        8 +
+        casterActor.system.abilities.cha.mod +
+        casterActor.system.attributes.prof;
 
-      if (saveRoll >= saveDC) {
+      if (saveRoll.total >= saveDC) {
         // Target saved, print it to chat
         ChatMessage.create({
           content: `<p>${frightenTarget.actor.name} was not frightened by Fey Step...</p>`,
@@ -111,21 +193,11 @@ if (currentSeason === "Spring") {
         });
       } else {
         // Mark token as freightened
-        await casterActor.toggleStatusEffect("frightened", { active: true });
-       
-        // Register hook to remove the effect after 1 round
-        const hookId = Hooks.on(
-          "combatTurnChange",
-          async (combat, oldTurn, newTurn) => {
-            if (casterActor.name !== canvas.scene.tokens.get(newTurn.tokenId).name) {
-              return;
-            }
-        
-            await casterActor.toggleStatusEffect("frightened", { active: false });
-            // Remove the hook once it runs
-            Hooks.off("combatTurnChange", hookId);
-          }
-        );
+        await frightenTarget.actor.toggleStatusEffect("frightened", {
+          active: true,
+        });
+
+        setupConditionHooks("frightened", 6, frightenTarget.actor);
 
         // Print a chat message with the result
         ChatMessage.create({
@@ -138,7 +210,7 @@ if (currentSeason === "Spring") {
       return;
     },
     defaultYes: false,
-  }).render();
+  });
 }
 
 let position = await new Portal()
@@ -177,6 +249,8 @@ await CanvasAnimation.animate(
   }
 );
 
+await teleportToken.document.update({ alpha: 0 }, { animate: false });
+
 await teleportToken.document.update(
   { x: position.x, y: position.y, elevation: position.elevation },
   { animate: false }
@@ -208,6 +282,11 @@ await CanvasAnimation.animate(
   }
 );
 
+await teleportToken.document.update(
+  { alpha: originalAlpha },
+  { animate: false }
+);
+
 // After teleport season effects
 if (currentSeason === "Summer") {
   ChatMessage.create({
@@ -215,12 +294,49 @@ if (currentSeason === "Summer") {
     speaker: casterSpeaker,
   });
 } else if (currentSeason === "Autumn") {
-  // Check if wants to use the feature
-  // If yes, get 2 targets
-  // Wisdom save for the targets, charmed if they fail
-  // Charmed for 1 minute or until dealt damage
-  Chatmessage.create({
-    content: "",
-    speaker: casterSpeaker,
+  await Dialog.confirm({
+    title: "Fey Step - Autumn",
+    content: `<p>Will you attempt to charm up to 2 creatures within 10 feet after teleporting?</p><br>
+    <p>If yes, target the creatures before proceeding...</p>`,
+    yes: async () => {
+      if (game.user.targets.size < 0 || game.user.targets.size > 2) {
+        ui.notifications.warn("The charm effect requires one or two targets");
+        return;
+      }
+
+      let saveDC =
+        8 +
+        casterActor.system.abilities.cha.mod +
+        casterActor.system.attributes.prof;
+
+      game.user.targets.forEach(async (target) => {
+        let saveRoll = await target.actor.rollAbilitySave("wis");
+
+        console.log(`DC: ${saveDC}; Roll: ${saveRoll.total}`);
+
+        if (saveRoll.total >= saveDC) {
+          // Target saved, print it to chat
+          ChatMessage.create({
+            content: `<p>${target.actor.name} was not charmed by Fey Step...</p>`,
+            speaker: casterSpeaker,
+          });
+        } else {
+          // Mark token as freightened
+          await target.actor.toggleStatusEffect("charmed", { active: true });
+
+          setupConditionHooks("charmed", 60, target.actor);
+
+          // Print a chat message with the result
+          ChatMessage.create({
+            content: `<p>${target.actor.name} has been charmed by Fey Step!</p>`,
+            speaker: casterSpeaker,
+          });
+        }
+      });
+    },
+    no: () => {
+      return;
+    },
+    defaultYes: false,
   });
 }

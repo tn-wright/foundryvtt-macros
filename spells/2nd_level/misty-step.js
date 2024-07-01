@@ -40,6 +40,8 @@ await CanvasAnimation.animate(
   }
 );
 
+await casterToken.document.update({ alpha: 0 }, { animate: false });
+
 await casterToken.document.update(
   { x: position.x, y: position.y, elevation: position.elevation },
   { animate: false }
@@ -70,3 +72,5 @@ await CanvasAnimation.animate(
     wait: wait(1300),
   }
 );
+
+await casterToken.document.update({ alpha: originalAlpha }, { animate: false });
