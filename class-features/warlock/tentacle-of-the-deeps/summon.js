@@ -56,31 +56,21 @@ if (tentacle) {
 
 // Set up animation
 const sequence = new Sequence()
+  .animation()
+    .on(tentacle)
+    .fadeIn(300, { ease: "easeInCircle" })
+    .opacity(1)
   .effect()
-  .file("jb2a.arms_of_hadar.dark_purple")
-  .atLocation(tentacle.object.center)
-  .randomRotation()
-  .belowTokens()
-  .scale(0.5)
-  .scaleIn(0.1, 200, { ease: "easeOutCubic" })
-  .scaleOut(0.1, 400, { ease: "easeInCubic" })
-  .duration(1000)
+    .delay(100)
+    .file("jb2a.arms_of_hadar.dark_purple")
+    .atLocation(tentacle.object.center)
+    .belowTokens()
+    .randomRotation()
+    .scale(0.5)
+    .scaleIn(0.1, 200, { ease: "easeOutCubic" })
+    .scaleOut(0.1, 400, { ease: "easeInCubic" })
+    .duration(1000)
   .play();
-
-await CanvasAnimation.animate(
-  [
-    {
-      parent: tentacle.object.mesh,
-      attribute: "alpha",
-      from: 0,
-      to: 1,
-    },
-  ],
-  {
-    duration: 300,
-    easing: "easeInCircle",
-  }
-);
 
 await tentacle.update({ alpha: 1 }, { animate: false });
 

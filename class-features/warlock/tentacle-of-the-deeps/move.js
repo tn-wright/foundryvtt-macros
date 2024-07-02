@@ -18,49 +18,30 @@ const selectedPosition = await new Portal()
   .range(moveRange)
   .pick();
 
-await CanvasAnimation.animate(
-  [
-    {
-      parent: tentacle.mesh,
-      attribute: "alpha",
-      to: 0,
-    },
-  ],
-  {
-    duration: 300,
-    easing: "easeOutCircle",
-  }
-);
-
-// Move the token
 const movePosition = canvas.grid.getTopLeftPoint(selectedPosition);
-await tentacle.document.update(movePosition, { animate: false });
-new Sequence()
-  .effect()
-  .file("jb2a.arms_of_hadar.dark_purple")
-  .atLocation(tentacle.center)
-  .belowTokens()
-  .randomRotation()
-  .scale(0.5)
-  .scaleIn(0.1, 200, { ease: "easeOutCubic" })
-  .scaleOut(0.1, 400, { ease: "easeInCubic" })
-  .duration(1000)
-  .play();
 
-await CanvasAnimation.animate(
-  [
-    {
-      parent: tentacle.mesh,
-      attribute: "alpha",
-      from: 0,
-      to: 1,
-    },
-  ],
-  {
-    duration: 300,
-    easing: "easeInCircle",
-  }
-);
+new Sequence()
+  .animation()
+    .on(tentacle)
+    .fadeOut(300, { ease: "easeOutCirlce" })
+    .opacity(0)
+    .teleportTo(movePosition)
+    .waitUntilFinished()
+  .animation()
+    .on(tentacle)
+    .fadeIn(300, { ease: "easeInCircle" })
+    .opacity(1)
+  .effect()
+    .delay(100)
+    .file("jb2a.arms_of_hadar.dark_purple")
+    .atLocation(selectedPosition)
+    .belowTokens()
+    .randomRotation()
+    .scale(0.5)
+    .scaleIn(0.1, 200, { ease: "easeOutCubic" })
+    .scaleOut(0.1, 400, { ease: "easeInCubic" })
+    .duration(1000)
+  .play();
 
 const attackDialog = new Dialog({
   title: "Attack?",
@@ -78,9 +59,9 @@ const attackDialog = new Dialog({
           return;
         }
 
-        const attackItem = tentacle.actor.items.find(
-          (i) => i.name === "Attack"
-        );
+        const attackItem = tentacle.actor
+          .getEmbeddedCollection("items")
+          .find((i) => i.name === "Attack");
 
         attackItem.use();
       },
