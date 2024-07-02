@@ -26,7 +26,7 @@ if (args[0].hitTargets.length === 0) {
   await Dialog.confirm({
     label: "Repelling Blast",
     content: `<p>Would you like to push the target with Repelling Blast?</p><br>`,
-    yes: () => {
+    yes: async () => {
       // distance to push token in pixels
       const distance = Math.round(10 / canvas.grid.distance) * canvas.grid.size;
       // Ratio of half a space of the total distance
@@ -66,10 +66,9 @@ if (args[0].hitTargets.length === 0) {
       // Snap the final position to a center point
       let projectedPosition = canvas.grid.getTopLeftPoint(projectedPoint);
 
-      targetToken.document.update({
-        x: projectedPosition.x,
-        y: projectedPosition.y,
-      });
+      await game.macros
+        .getName("push-actor")
+        .execute({ targetId: targetToken.id, pos: projectedPosition });
     },
     no: () => {
       return;
