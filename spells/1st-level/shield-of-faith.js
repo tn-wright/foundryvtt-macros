@@ -1,19 +1,20 @@
-let casterActor = item.actor;
-let target = game.user.targets.first();
+const casterActor = item.actor;
+let targetId = args[1].tokenId;
+let target = game.canvas.tokens.get(targetId);
 
-casterActor.setFlag("world", "sof-target-id", target.id);
+casterActor.setFlag("world", "sof-target-id", targetId);
 
 if (args[0] === "on") {
   new Sequence()
     .effect()
       .file("jb2a.shield.02.intro.yellow")
       .attachTo(target)
-      .scale(0.4)
+      .scaleToObject(1.5, { unifrom: true, considerTokenScale: true })
       .waitUntilFinished(-700)
     .effect()
       .file("jb2a.shield.02.loop.yellow")
       .attachTo(target)
-      .scale(0.4)
+      .scaleToObject(1.5, { unifrom: true, considerTokenScale: true })
       .persist()
       .name(`SoF-${target.id}`)
       .fadeIn(300)
@@ -23,10 +24,8 @@ if (args[0] === "on") {
 }
 
 if (args[0] === "off") {
-  let targetId = casterActor.getFlag("world", "sof-target-id");
-  console.log(targetId);
+  targetId = casterActor.getFlag("world", "sof-target-id");
   target = game.canvas.tokens.get(targetId);
-  console.log(target);
 
   Sequencer.EffectManager.endEffects({
     name: `SoF-${target.id}`,
@@ -37,6 +36,6 @@ if (args[0] === "off") {
     .effect()
     .file("jb2a.shield.02.outro_fade.yellow")
     .attachTo(target)
-    .scale(0.4)
+    .scaleToObject(1.5, { unifrom: true, considerTokenScale: true })
     .play();
 }
