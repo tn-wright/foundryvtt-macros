@@ -1,4 +1,4 @@
-const casterToken = item.parent.getActiveTokens()[0];
+const casterToken = item.actor.getActiveTokens()[0];
 
 let position = await new Portal()
   .color(game.user.color)

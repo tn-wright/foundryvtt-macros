@@ -1,5 +1,5 @@
 const summonRange = item.system.range.value;
-const casterActor = item.parent;
+const casterActor = item.actor;
 const casterWarlockLevel = casterActor.classes.warlock.system.levels;
 const casterToken = casterActor.getActiveTokens()[0];
 

@@ -1,7 +1,3 @@
-const wait = async (ms) => {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-};
-
 const generateSummerMessage = (dmgAmount) => {
   return `
 <div class="dnd5e2 chat-card midi-chat-card item-card">

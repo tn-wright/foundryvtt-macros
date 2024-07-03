@@ -1,4 +1,4 @@
-const casterActor = item.parent;
+const casterActor = item.actor;
 const tidesOfChaosFeature = casterActor.items.find(
   (i) => i.name === "Tides of Chaos"
 );
@@ -44,7 +44,7 @@ if (surgeMethod === "tidesOfChaos") {
     default: "roll",
   });
 
-  if (roll.total < 1) {
+  if (roll.total !== 1) {
     return;
   }
 }
