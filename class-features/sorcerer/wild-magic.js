@@ -16,7 +16,7 @@ if (!surgeMethod) {
   return;
 }
 
-if (surgeMethod === "tidesOfChaos") {
+if (surgeMethod === "tides") {
   tidesOfChaosFeature.update({
     system: {
       uses: {
