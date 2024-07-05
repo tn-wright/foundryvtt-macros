@@ -1,16 +1,17 @@
 const userActor = item.actor;
 
 const cunningActionDialog = new Dialog({
-  title: "Trance",
+  title: "Cunning Action",
   content: `<form>
-  <div class="form-group">
-    <label for="cunning-action">Action:</label>
-    <select name="cunning-action">
-      <option value="dash">Dash</option>
-      <option value="disengage">Disengage</option>
-      <option value="hide">Hide</option>
-    </select>
-  </div>`,
+    <div class="form-group">
+      <label for="cunning-action">Action:</label>
+      <select name="cunning-action">
+        <option value="dash">Dash</option>
+        <option value="disengage">Disengage</option>
+        <option value="hide">Hide</option>
+      </select>
+    </div>
+  </form>`,
   buttons: {
     submit: {
       icon: "<i class='fa-solid fa-check'></i>",
