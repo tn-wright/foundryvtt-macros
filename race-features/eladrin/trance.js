@@ -40,7 +40,7 @@ const profs = [
 
 console.log("Making variables");
 
-const casterActor = item.parent;
+const casterActor = item.actor;
 const seasonFeature = casterActor.items.find((i) => i.name.match(/Season - /));
 const currentSeason = seasonFeature.name.split(" ")[2] ?? "";
 const currentProf1 = casterActor.getFlag("world", "trance-prof1") ?? "";
