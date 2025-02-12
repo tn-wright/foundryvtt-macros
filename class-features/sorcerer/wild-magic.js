@@ -5,26 +5,24 @@ const tidesOfChaosFeature = casterActor.items.find(
 const remainingTidesUses = tidesOfChaosFeature.system.uses.value;
 const maxTidesUses = tidesOfChaosFeature.system.uses.max;
 
-const surgeMethod = await game.macros.getName("gm-wild-magic").execute({
-  charName: casterActor.name,
-  spellCast: item.name,
-  tidesAvailable: remainingTidesUses,
-  tidesMax: maxTidesUses,
-});
-
-if (!surgeMethod) {
-  return;
-}
-
-if (surgeMethod === "tides") {
-  tidesOfChaosFeature.update({
+if (remainingTidesUses < maxTidesUses) {
+  await tidesOfChaosFeature.update({
     system: {
       uses: {
         value: maxTidesUses,
       },
     },
   });
-} else if (surgeMethod === "roll") {
+} else {
+  const surgeMethod = await game.macros.getName("gm-wild-magic").execute({
+    charName: casterActor.name,
+    spellCast: item.name,
+  });
+
+  if (!surgeMethod) {
+    return;
+  }
+
   let roll;
   await Dialog.wait({
     title: "Roll",
@@ -44,7 +42,7 @@ if (surgeMethod === "tides") {
     default: "roll",
   });
 
-  if (roll.total !== 1) {
+  if (roll.total !== 20) {
     return;
   }
 }
