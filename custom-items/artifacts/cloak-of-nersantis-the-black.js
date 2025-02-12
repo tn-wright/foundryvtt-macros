@@ -1,27 +1,29 @@
-var GREEN_FLAG_SCOPE = "world";
+//!TODO: Verify functionality 
 
-var GREEN_UPDATE_HOOK_ID_KEY = "updateHookIdBlack";
-var GREEN_DELETE_HOOK_ID_KEY = "deleteHookIdBlack";
+var BLACK_FLAG_SCOPE = "world";
 
-var GREEN_ITEM_NAME = "Cloak of Nesantis the Black";
+var BLACK_UPDATE_HOOK_ID_KEY = "updateHookIdBlack";
+var BLACK_DELETE_HOOK_ID_KEY = "deleteHookIdBlack";
 
-var GREEN_SPELL_ONE_USES = 1;
-var GREEN_SPELL_ONE_UUID = "Compendium.world.spells.Item.tux03ESXNcBevQS8";
-var GREEN_SPELL_ONE_NAME = `Destructive Wave (${GREEN_ITEM_NAME})`;
-var GREEN_SPELL_ONE_MACRO = null;
+var BLACK_ITEM_NAME = "Cloak of Nesantis the Black";
 
-var GREEN_SPELL_TWO_USES = 1;
-var GREEN_SPELL_TWO_UUID =
+var BLACK_SPELL_ONE_USES = 1;
+var BLACK_SPELL_ONE_UUID = "Compendium.world.spells.Item.tux03ESXNcBevQS8";
+var BLACK_SPELL_ONE_NAME = `Destructive Wave (${BLACK_ITEM_NAME})`;
+var BLACK_SPELL_ONE_MACRO = null;
+
+var BLACK_SPELL_TWO_USES = 1;
+var BLACK_SPELL_TWO_UUID =
   "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.p6zDJl6RUkCFkfXP";
-var GREEN_SPELL_TWO_NAME = `Wall of Water (${GREEN_ITEM_NAME})`;
-var GREEN_SPELL_TWO_MACRO = null;
+var BLACK_SPELL_TWO_NAME = `Wall of Water (${BLACK_ITEM_NAME})`;
+var BLACK_SPELL_TWO_MACRO = null;
 
 /****************************************
  *       General Utility Functions       *
  *****************************************/
 
 const logMessage = (level, func, msg) => {
-  let logOutput = `${GREEN_ITEM_NAME}: ${func}: ${msg}`;
+  let logOutput = `${BLACK_ITEM_NAME}: ${func}: ${msg}`;
 
   if (level === "Error") {
     console.error(logOutput);
@@ -45,7 +47,7 @@ const getFlagOrDefault = async (object, flag, defaultVal) => {
     "getFlagOrDefault",
     `Getting flag ${flag} from ${object}`
   );
-  let featureVal = object.getFlag(GREEN_FLAG_SCOPE, flag);
+  let featureVal = object.getFlag(BLACK_FLAG_SCOPE, flag);
   logMessage(
     "Debug",
     "getFlagOrDefault",
@@ -59,7 +61,7 @@ const getFlagOrDefault = async (object, flag, defaultVal) => {
       `No value found, using default of ${defaultVal}`
     );
     featureVal = defaultVal;
-    await object.setFlag(GREEN_FLAG_SCOPE, flag, defaultVal);
+    await object.setFlag(BLACK_FLAG_SCOPE, flag, defaultVal);
   }
 
   return featureVal;
@@ -88,11 +90,11 @@ const useAbility = async () => {
  *****************************************/
 
 // Get this item from the owning character
-const item = getObjectFromActor(GREEN_ITEM_NAME);
+const item = getObjectFromActor(BLACK_ITEM_NAME);
 
 // Get the event hooks from previous executions, if they exist
-let updateHookId = await getFlagOrDefault(item, GREEN_UPDATE_HOOK_ID_KEY, -1);
-let deleteHookId = await getFlagOrDefault(item, GREEN_DELETE_HOOK_ID_KEY, -1);
+let updateHookId = await getFlagOrDefault(item, BLACK_UPDATE_HOOK_ID_KEY, -1);
+let deleteHookId = await getFlagOrDefault(item, BLACK_DELETE_HOOK_ID_KEY, -1);
 
 // Add listener for updateItem hook
 if (
@@ -101,7 +103,7 @@ if (
 ) {
   updateHookId = Hooks.on("updateItem", async (item, change) => {
     // Check to make sure the event is relevant
-    if (item.name !== GREEN_ITEM_NAME) {
+    if (item.name !== BLACK_ITEM_NAME) {
       return;
     }
 
@@ -138,51 +140,51 @@ if (
       }
 
       // Destructive Wave
-      if (!getObjectFromActor(GREEN_SPELL_ONE_NAME)) {
+      if (!getObjectFromActor(BLACK_SPELL_ONE_NAME)) {
         logMessage(
           "Debug",
           "addSpellToActor",
-          `Spell ${GREEN_SPELL_ONE_NAME} not found on actor`
+          `Spell ${BLACK_SPELL_ONE_NAME} not found on actor`
         );
-        let spell = await fromUuid(GREEN_SPELL_ONE_UUID);
+        let spell = await fromUuid(BLACK_SPELL_ONE_UUID);
         logMessage(
           "Debug",
           "addSpellToActor",
-          `Fetched ${GREEN_SPELL_ONE_NAME} from compendium: ${spell.toJSON()}`
+          `Fetched ${BLACK_SPELL_ONE_NAME} from compendium: ${spell.toJSON()}`
         );
         if (typeof spell === "undefined" || spell === null) {
           logMessage(
             "Error",
             "addSpellToActor",
-            `${GREEN_SPELL_ONE_NAME} not found or invalid`
+            `${BLACK_SPELL_ONE_NAME} not found or invalid`
           );
           return;
         }
 
         let clone = await spell.clone({
-          name: GREEN_SPELL_ONE_NAME,
+          name: BLACK_SPELL_ONE_NAME,
           system: {
             preparation: {
               mode: "atwill",
             },
             uses: {
-              max: GREEN_SPELL_ONE_USES,
+              max: BLACK_SPELL_ONE_USES,
               per: "dawn",
               prompt: "true",
               recovery: "",
-              value: GREEN_SPELL_ONE_USES,
+              value: BLACK_SPELL_ONE_USES,
             },
           },
         });
-        if (GREEN_SPELL_ONE_MACRO !== null) {
+        if (BLACK_SPELL_ONE_MACRO !== null) {
           logMessage(
             "Debug",
             "addSpellToActor",
-            `Adding custom item macro to ${GREEN_SPELL_ONE_NAME}`
+            `Adding custom item macro to ${BLACK_SPELL_ONE_NAME}`
           );
           clone.setFlag("dae", "macro", {
-            macro: GREEN_SPELL_ONE_MACRO,
-            name: GREEN_SPELL_ONE_NAME,
+            macro: BLACK_SPELL_ONE_MACRO,
+            name: BLACK_SPELL_ONE_NAME,
             scope: "global",
             type: "script",
           });
@@ -197,51 +199,51 @@ if (
       }
 
       // Wall of Water
-      if (!getObjectFromActor(GREEN_SPELL_TWO_NAME)) {
+      if (!getObjectFromActor(BLACK_SPELL_TWO_NAME)) {
         logMessage(
           "Debug",
           "addSpellToActor",
-          `Spell ${GREEN_SPELL_TWO_NAME} not found on actor`
+          `Spell ${BLACK_SPELL_TWO_NAME} not found on actor`
         );
-        let spell = await fromUuid(GREEN_SPELL_TWO_UUID);
+        let spell = await fromUuid(BLACK_SPELL_TWO_UUID);
         logMessage(
           "Debug",
           "addSpellToActor",
-          `Fetched ${GREEN_SPELL_TWO_NAME} from compendium: ${spell.toJSON()}`
+          `Fetched ${BLACK_SPELL_TWO_NAME} from compendium: ${spell.toJSON()}`
         );
         if (typeof spell === "undefined" || spell === null) {
           logMessage(
             "Error",
             "addSpellToActor",
-            `${GREEN_SPELL_TWO_NAME} not found or invalid`
+            `${BLACK_SPELL_TWO_NAME} not found or invalid`
           );
           return;
         }
 
         let clone = await spell.clone({
-          name: GREEN_SPELL_TWO_NAME,
+          name: BLACK_SPELL_TWO_NAME,
           system: {
             preparation: {
               mode: "atwill",
             },
             uses: {
-              max: GREEN_SPELL_TWO_USES,
+              max: BLACK_SPELL_TWO_USES,
               per: "dawn",
               prompt: "true",
               recovery: "",
-              value: GREEN_SPELL_TWO_USES,
+              value: BLACK_SPELL_TWO_USES,
             },
           },
         });
-        if (GREEN_SPELL_TWO_MACRO !== null) {
+        if (BLACK_SPELL_TWO_MACRO !== null) {
           logMessage(
             "Debug",
             "addSpellToActor",
-            `Adding custom item macro to ${GREEN_SPELL_TWO_NAME}`
+            `Adding custom item macro to ${BLACK_SPELL_TWO_NAME}`
           );
           clone.setFlag("dae", "macro", {
-            macro: GREEN_SPELL_TWO_MACRO,
-            name: GREEN_SPELL_TWO_NAME,
+            macro: BLACK_SPELL_TWO_MACRO,
+            name: BLACK_SPELL_TWO_NAME,
             scope: "global",
             type: "script",
           });
@@ -269,14 +271,14 @@ if (
         return;
       }
 
-      let spellClone = getObjectFromActor(GREEN_SPELL_ONE_NAME);
+      let spellClone = getObjectFromActor(BLACK_SPELL_ONE_NAME);
       if (typeof spellClone !== "undefined" && spellClone !== null) {
         await actor.deleteEmbeddedDocuments("Item", [spellClone.id]);
       } else {
         logMessage(
           "Warn",
           "removeSpellFromActor",
-          `Unable to find ${GREEN_SPELL_ONE_NAME} on actor`
+          `Unable to find ${BLACK_SPELL_ONE_NAME} on actor`
         );
       }
 
@@ -284,21 +286,21 @@ if (
         return;
       }
 
-      spellClone = getObjectFromActor(GREEN_SPELL_TWO_NAME);
+      spellClone = getObjectFromActor(BLACK_SPELL_TWO_NAME);
       if (typeof spellClone !== "undefined" && spellClone !== null) {
         await actor.deleteEmbeddedDocuments("Item", [spellClone.id]);
       } else {
         logMessage(
           "Warn",
           "removeSpellFromActor",
-          `Unable to find ${GREEN_SPELL_TWO_NAME} on actor`
+          `Unable to find ${BLACK_SPELL_TWO_NAME} on actor`
         );
       }
     }
   });
 
   // Store the id of the listener for reference later
-  item.setFlag(GREEN_FLAG_SCOPE, GREEN_UPDATE_HOOK_ID_KEY, updateHookId);
+  item.setFlag(BLACK_FLAG_SCOPE, BLACK_UPDATE_HOOK_ID_KEY, updateHookId);
 }
 
 // Add listener for preDeleteItem hook
@@ -308,20 +310,20 @@ if (
 ) {
   deleteHookId = Hooks.on("preDeleteItem", async (item) => {
     // Make sure the event is relevant
-    if (item.name !== GREEN_ITEM_NAME) {
+    if (item.name !== BLACK_ITEM_NAME) {
       return;
     }
 
     // Get the listener IDs for this item
     let updateHookId = await getFlagOrDefault(
       item,
-      GREEN_UPDATE_HOOK_ID_KEY,
+      BLACK_UPDATE_HOOK_ID_KEY,
       -1
     );
 
     let deleteHookid = await getFlagOrDefault(
       item,
-      GREEN_DELETE_HOOK_ID_KEY,
+      BLACK_DELETE_HOOK_ID_KEY,
       -1
     );
 
@@ -351,14 +353,14 @@ if (
       return;
     }
 
-    let spellClone = getObjectFromActor(GREEN_SPELL_ONE_NAME);
+    let spellClone = getObjectFromActor(BLACK_SPELL_ONE_NAME);
     if (typeof spellClone !== "undefined" && spellClone !== null) {
       await actor.deleteEmbeddedDocuments("Item", [spellClone.id]);
     } else {
       logMessage(
         "Warn",
         "removeSpellFromActor",
-        `Unable to find ${GREEN_SPELL_ONE_NAME} on actor`
+        `Unable to find ${BLACK_SPELL_ONE_NAME} on actor`
       );
     }
 
@@ -367,20 +369,20 @@ if (
       return;
     }
 
-    spellClone = getObjectFromActor(GREEN_SPELL_TWO_NAME);
+    spellClone = getObjectFromActor(BLACK_SPELL_TWO_NAME);
     if (typeof spellClone !== "undefined" && spellClone !== null) {
       await actor.deleteEmbeddedDocuments("Item", [spellClone.id]);
     } else {
       logMessage(
         "Warn",
         "removeSpellFromActor",
-        `Unable to find ${GREEN_SPELL_TWO_NAME} on actor`
+        `Unable to find ${BLACK_SPELL_TWO_NAME} on actor`
       );
     }
   });
 
   // Store the id of the listener for reference later
-  item.setFlag(GREEN_FLAG_SCOPE, GREEN_DELETE_HOOK_ID_KEY, deleteHookId);
+  item.setFlag(BLACK_FLAG_SCOPE, BLACK_DELETE_HOOK_ID_KEY, deleteHookId);
 }
 
 if (item.system.equipped && item.system.attuned) {
