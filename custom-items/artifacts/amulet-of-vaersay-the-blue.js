@@ -7,31 +7,31 @@ var BLUE_ITEM_NAME = "Amulet of Vaersay the Blue";
 
 var BLUE_SPELL_ONE_USES = 1;
 var BLUE_SPELL_ONE_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.JYZ1dN1H8aZ5fy4i";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.XE4LdYlJdZgnOaQb";
 var BLUE_SPELL_ONE_NAME = `Mass Suggestion (${BLUE_ITEM_NAME})`;
 var BLUE_SPELL_ONE_MACRO = null;
 
 var BLUE_SPELL_TWO_USES = 1;
 var BLUE_SPELL_TWO_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.pN2FDPHNR2MrGiCk";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.rZkqZBP7R91nHWVM";
 var BLUE_SPELL_TWO_NAME = `Dominate Person (${BLUE_ITEM_NAME})`;
 var BLUE_SPELL_TWO_MACRO = null;
 
 var BLUE_SPELL_THREE_USES = 1;
 var BLUE_SPELL_THREE_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.dHRAVTwwaTgiOqwJ";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.b4DDExwdJr5hITWt";
 var BLUE_SPELL_THREE_NAME = `Charm Person (${BLUE_ITEM_NAME})`;
 var BLUE_SPELL_THREE_MACRO = null;
 
 var BLUE_SPELL_FOUR_USES = 1;
 var BLUE_SPELL_FOUR_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.nIY1uWQZ9lV0nVUL";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.maSyGTfvsc3F3Q4g";
 var BLUE_SPELL_FOUR_NAME = `Enthrall (${BLUE_ITEM_NAME})`;
 var BLUE_SPELL_FOUR_MACRO = null;
 
 var BLUE_SPELL_FIVE_USES = 1;
 var BLUE_SPELL_FIVE_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.PQ9gqtk0W8BULHho";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.9jr5YWlWO0yGRbp6";
 var BLUE_SPELL_FIVE_NAME = `Fast Friends (${BLUE_ITEM_NAME})`;
 var BLUE_SPELL_FIVE_MACRO = null;
 
@@ -90,8 +90,8 @@ const getFlagOrDefault = async (object, flag, defaultVal) => {
 
 // Use the ability of the item
 const useAbility = async () => {
-  logMessage("Info", "useAbility", `Restoring sorcery points`);
-  var feature = getObjectFromActor("Sorcery Points");
+  logMessage("Info", "useAbility", `Restoring uses of Bardic Inspiration`);
+  var feature = getObjectFromActor("Bardic Inspiration");
   await feature.update({
     system: {
       uses: {
