@@ -1,10 +1,11 @@
 const template = fromUuidSync(args[0].templateUuid);
+const location = { x: template.x, y: template.y };
 
-await new Sequence()
+const animation = await new Sequence()
   .effect()
     .file("jb2a.template_circle.out_pulse.02.burst.purplepink")
     .zIndex(2)
-    .atLocation(template)
+    .atLocation(location)
     .belowTokens()
     .duration(2300)
     .scale(1.8)
@@ -13,7 +14,7 @@ await new Sequence()
   .effect()
     .file("jb2a.template_circle.vortex.loop.dark_black")
     .zIndex(1)
-    .atLocation(template)
+    .atLocation(location)
     .belowTokens()
     .playbackRate(2)
     .duration(1500)
@@ -22,8 +23,9 @@ await new Sequence()
     .tint("#ce1fff")
     .scaleIn(0, 600)
     .fadeOut(100)
-    .waitUntilFinished(-200)
-  .play();
+    .waitUntilFinished(-200);
+
+await animation.play();
 
 const darknessData = {
   elevation: 0,
@@ -62,15 +64,18 @@ const darknessData = {
     },
   },
 };
-const darknessSource = await AmbientLightDocument.create(
-  { x: template.x, y: template.y, ...darknessData },
-  { parent: canvas.scene }
-);
+const darknessSource = await game.macros
+  .getName("gm-create-light")
+  .execute({ pos: { x: template.x, y: template.y }, data: darknessData });
 
-const destroyHookId = Hooks.on("destroyMeasuredTemplate", (temp) => {
+const destroyHookId = Hooks.on("destroyMeasuredTemplate", async (temp) => {
   if (template.uuid !== temp.document.uuid) {
     return;
   }
-  darknessSource.delete();
+
+  await game.macros
+    .getName("gm-delete-light")
+    .execute({ light: darknessSource._id });
+
   Hooks.off("destroyMeasuredTemplate", destroyHookId);
 });
