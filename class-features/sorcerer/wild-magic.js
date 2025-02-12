@@ -9,7 +9,7 @@ if (remainingTidesUses < maxTidesUses) {
   await tidesOfChaosFeature.update({
     system: {
       uses: {
-        value: maxTidesUses,
+        spent: 0,
       },
     },
   });

@@ -95,7 +95,7 @@ const useAbility = async () => {
   await feature.update({
     system: {
       uses: {
-        value: feature.system.uses.max,
+        spent: 0,
       },
     },
   });
