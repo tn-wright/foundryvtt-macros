@@ -5,6 +5,8 @@ var GREEN_DELETE_HOOK_ID_KEY = "deleteHookIdBlack";
 
 var GREEN_ITEM_NAME = "Cloak of Nesantis the Black";
 
+// !TODO: Do we use these spell settings for the custom attack action that unlocks at level 4?
+
 var GREEN_SPELL_ONE_USES = 1;
 var GREEN_SPELL_ONE_UUID = "Compendium.world.spells.Item.tux03ESXNcBevQS8";
 var GREEN_SPELL_ONE_NAME = `Destructive Wave (${GREEN_ITEM_NAME})`;
@@ -68,6 +70,8 @@ const getFlagOrDefault = async (object, flag, defaultVal) => {
 /****************************************
  *           Ability Functions           *
  *****************************************/
+
+// !TODO: Can this be replaced entirely with the new built in actions?
 
 // Use the ability of the item
 const useAbility = async () => {
@@ -133,6 +137,9 @@ if (
     logMessage("Debug", "addSpellToActor", `Adding spells to actor`);
     if (item.system.equipped && item.system.attuned) {
       // Only add the following spells if the item is at or above level 3
+
+      // !TODO: Alter the damage on the Hunter's Mark spell on the actor
+
       if (maxActiveEffect < 3) {
         return;
       }
@@ -192,7 +199,7 @@ if (
       }
 
       // Only add the following spell if the item is at level 4
-      if (maxActiveEffect < 3) {
+      if (maxActiveEffect < 4) {
         return;
       }
 
@@ -263,6 +270,8 @@ if (
           maxActiveEffect = num;
         }
       });
+
+      // !TODO: Reset the damage of Hunter's Mark to the default
 
       // Only try to remove the following spells if item is at or above level 3
       if (maxActiveEffect < 3) {
@@ -345,6 +354,8 @@ if (
         maxActiveEffect = num;
       }
     });
+
+    // !TODO: Reset the damage of Hunter's Mark to the default
 
     // Only try to remove the following spells if item is at or above level 3
     if (maxActiveEffect < 3) {
