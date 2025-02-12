@@ -7,13 +7,13 @@ var RED_ITEM_NAME = "Helm of Caldrunith the Red";
 
 var RED_SPELL_ONE_USES = 2;
 var RED_SPELL_ONE_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.7GImCbivuse6sHZR";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.CI1OIVMlYRyMpNkf";
 var RED_SPELL_ONE_NAME = `Aganazzar's Scorcher (${RED_ITEM_NAME})`;
 var RED_SPELL_ONE_MACRO = null;
 
 var RED_SPELL_TWO_USES = 1;
 var RED_SPELL_TWO_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.LJC7ZeAC98QsWKx7";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.b7VdDhYvxjz4RtoC";
 var RED_SPELL_TWO_NAME = `Fireball (${RED_ITEM_NAME})`;
 var RED_SPELL_TWO_MACRO = null;
 

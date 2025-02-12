@@ -7,7 +7,7 @@ var WHITE_ITEM_NAME = "Shield of Maniessyr the White";
 
 var WHITE_SPELL_ONE_USES = 3;
 var WHITE_SPELL_ONE_UUID =
-  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.GVumwXmVWxt1yUlA";
+  "Compendium.world.ddb-rise-of-dragons-ddb-spells.Item.WUgAuqbUTiBw0ijj";
 var WHITE_SPELL_ONE_NAME = `Absorb Elements (${WHITE_ITEM_NAME})`;
 var WHITE_SPELL_ONE_MACRO = null;
 
