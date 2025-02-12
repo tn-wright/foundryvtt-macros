@@ -120,11 +120,9 @@ const casterActor = item.actor;
 const layOnHandsPool = casterActor.items.find(
   (i) => i.name === "Lay on Hands Pool"
 );
-console.log(layOnHandsPool);
+
 const currentCharges = layOnHandsPool.system.uses.value;
-console.log(currentCharges);
 const maxCharges = layOnHandsPool.system.uses.max;
-console.log(maxCharges);
 
 const target = game.user.targets.first() ?? casterActor.getActiveTokens()[0];
 
@@ -167,6 +165,15 @@ new Dialog({
           content: getMessageContent(chargesToUse, target.name),
           speaker: ChatMessage.getSpeaker(casterActor),
         });
+
+        new Sequence()
+          .effect()
+          .file("jb2a.cure_wounds.200px.purple")
+          .atLocation(target.center)
+          .scaleToObject(1.5)
+          .duration(3000)
+          .opacity(0.75)
+          .play();
 
         await layOnHandsPool.update({
           system: { uses: { value: currentCharges - chargesToUse } },
