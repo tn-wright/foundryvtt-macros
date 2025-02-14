@@ -59,59 +59,9 @@ await actor.setFlag("world", "pushTargetTime", combatTime);
 const casterToken = actor.getActiveTokens()[0];
 const targetToken = args[0].hitTargets[0].object;
 
-console.log("FURY_OF_THE_TIDES: Tokens");
-console.log(casterToken);
-console.log(targetToken);
-
-// distance to push token in pixels
-const distance = Math.round(10 / canvas.grid.distance) * canvas.grid.size;
-// Ratio of half a space of the total distance
-const halfSpaceRatio = canvas.grid.size / 2 / distance;
-
-// Build a ray from the caster to the target
-let ray = new Ray(casterToken.center, targetToken.center);
-
-console.log("FURY_OF_THE_TIDES: Ray");
-console.log(ray);
-
-// Project a ray in the same direction past the actor being pushed
-let projectedRay = Ray.fromAngle(ray.B.x, ray.B.y, ray.angle, distance);
-
-console.log("FURY_OF_THE_TIDES: Projected Ray");
-console.log(projectedRay);
-
-// Snap the end point to a grid center point
-projectedRay = new Ray(
-  projectedRay.A,
-  canvas.grid.getCenterPoint(projectedRay.B)
-);
-
-// See if the ray collides with anything
-let collision = CONFIG.Canvas.polygonBackends.move.testCollision(
-  projectedRay.A,
-  projectedRay.B,
-  { type: "move", mode: "closest" }
-);
-
-// Get the initial move point for the pushed actor
-let projectedPoint = projectedRay.B;
-
-// If there was a collision, calculate the new point to move
-if (collision) {
-  // Calculate the point of the collision minus half a space. The half space
-  // ensures that the actor does not end up in a space that is mostly behind
-  // a wall. Only spaces at least 50% visible will allow movement
-  let newProjectedPoint = projectedRay.project(
-    collision._distance - halfSpaceRatio
-  );
-  projectedPoint = newProjectedPoint;
-}
-// Snap the final position to a center point
-let projectedPosition = canvas.grid.getTopLeftPoint(projectedPoint);
-
-await game.macros
+let collision = await game.macros
   .getName("gm-push-actor")
-  .execute({ targetId: targetToken.id, pos: projectedPosition });
+  .execute({ pusherId: casterToken.id, targetId: targetToken.id, distance: 10 });
 
 // If the target collided, deal the extra damage
 if (collision) {
