@@ -46,7 +46,7 @@ await Dialog.confirm({
     let projectedPosition = canvas.grid.getTopLeftPoint(projectedPoint);
 
     await game.macros
-      .getName("push-actor")
+      .getName("gm-push-actor")
       .execute({ targetId: targetToken.id, pos: projectedPosition });
   },
   no: () => {
