@@ -9,25 +9,31 @@ const pxDistance =
 const halfSpaceRatio = canvas.grid.size / 2 / pxDistance;
 
 // Build a ray from the caster to the target
-let ray = new Ray(pusher.center, pushTarget.center);
+let directionRay = new Ray(pusher.center, pushTarget.center);
+// Convert ray's angle from radians to degrees
+let directionRayDegrees = directionRay.angle * (180 / Math.PI);
 
-// Project a ray in the same direction past the actor being pushed
-let projectedRay = Ray.fromAngle(ray.B.x, ray.B.y, ray.angle, pxDistance);
-
-// Snap the end point to a grid center point
-projectedRay = new Ray(
-  projectedRay.A,
-  canvas.grid.getCenterPoint(projectedRay.B)
+// Use the angle of the ray to get the projected end point
+let translatedEndPoint = canvas.grid.getTranslatedPoint(
+  pushTarget.center,
+  directionRayDegrees,
+  pushDistance
 );
 
-// See if the ray collides with anything
+// Create a new ray from the target to the projected end point
+let projectedRay = new Ray(
+  directionRay.B,
+  canvas.grid.getCenterPoint(translatedEndPoint)
+);
+
+// See if the ray collides with any walls
 let collision = CONFIG.Canvas.polygonBackends.move.testCollision(
   projectedRay.A,
   projectedRay.B,
   { type: "move", mode: "closest" }
 );
 
-// Get the initial move point for the pushed actor
+// Get the initial projected end point for the pushed actor
 let projectedPoint = projectedRay.B;
 
 // If there was a collision, calculate the new point to move
@@ -41,17 +47,33 @@ if (collision) {
   projectedPoint = newProjectedPoint;
 }
 
-projectedRay = new Ray(
-  projectedRay.A,
-  canvas.grid.getCenterPoint(projectedPoint)
-);
+// Get an array of grid spaces the push target will traverse
+let pathCoords = canvas.grid.getDirectPath([projectedRay.A, projectedPoint]);
 
-// Snap the final position to a center point
+// For each coord in path, check if there is a token there
+// If there is, set end of path to previous coord in path
+for (let i = 1; i < pathCoords.length; i++) {
+  let tokenAtCoords = canvas.tokens.documentCollection.find(
+    (tokenDoc) =>
+      tokenDoc.object.center.x === pathCoords[i].x &&
+      tokenDoc.object.center.y === pathCoords[i].y
+  );
+
+  if (tokenAtCoords) {
+    projectedPoint = pathCoords[i - 1];
+    collision = true;
+    break;
+  }
+}
+
+// Snap the final position to the top left corner of the grid space
 let projectedPosition = canvas.grid.getTopLeftPoint(projectedPoint);
 
+// Push the target
 pushTarget.document.update({
   x: projectedPosition.x,
   y: projectedPosition.y,
 });
 
-return collision;
+// Return true if there was a collision, false if there was not
+return !!collision;
