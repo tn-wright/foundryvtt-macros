@@ -1,125 +1,5 @@
-const getMessageContent = (amount, targetName) => {
-  return `
-<p>Healing <span style="font-weight:bold">${targetName}</span> for ${amount} HP</p>
-<div
-  class="dnd5e2 chat-card midi-chat-card item-card"
-  data-actor-id="qLAtMKIVb1yMNhDk"
-  data-actor-uuid="Actor.qLAtMKIVb1yMNhDk"
->
-  <div class="card-buttons midi-buttons"></div>
-  <div class="midi-results">
-    <div class="midi-qol-damage-roll">
-      <div style="text-align: center">Damage</div>
-      <div class="end-midi-qol-damage-roll"></div>
-      <div class="dice-roll midi-damage-roll">
-        <div class="dice-result">
-          <div class="dice-formula dmgBtn-mqol">
-            ${amount}<span class="dmgBtn-container-mqol"
-              ><button
-                class="dice-total-full-damage-button dice-total-full-button"
-                style="
-                  background-color: var(--dnd5e-color-failure-background);
-                  margin: 0px;
-                "
-              >
-                <i
-                  class="fas fa-user-minus"
-                  title="Click to apply up to ${amount} damage to selected token(s)."
-                ></i></button
-              ><button
-                class="dice-total-half-damage-button dice-total-half-button"
-                style="
-                  background-color: var(--dnd5e-color-failure-background);
-                  margin: 0px;
-                "
-              >
-                <i title="Click to apply up to ${Math.floor(
-                  amount / 2
-                )} damage to selected token(s)."
-                  >½</i
-                ></button
-              ><button
-                class="dice-total-quarter-damage-button dice-total-quarter-button"
-                style="
-                  background-color: var(--dnd5e-color-failure-background);
-                  margin: 0px;
-                "
-              >
-                <i title="Click to apply up to ${Math.floor(
-                  amount / 4
-                )} damage to selected token(s)."
-                  >¼</i
-                ></button
-              ><button
-                class="dice-total-double-damage-button dice-total-double-button"
-                style="
-                  background-color: var(--dnd5e-color-failure-background);
-                  margin: 0px;
-                "
-              >
-                <i title="Click to apply up to ${
-                  amount * 2
-                } damage to selected token(s)."
-                  >2</i
-                ></button
-              ><button
-                class="dice-total-full-damage-healing-button dice-total-healing-button"
-                style="
-                  background-color: var(--dnd5e-color-success);
-                  margin: 0px;
-                "
-              >
-                <i
-                  class="fas fa-user-plus"
-                  title="Click to heal up to ${amount} to selected token(s)."
-                ></i></button
-              ><button
-                class="dice-total-full-damage-temp-healing-button dice-total-healing-button"
-                style="
-                  background-color: var(--dnd5e-color-success-background);
-                  margin: 0px;
-                "
-              >
-                <i
-                  class="fas fa-user-plus"
-                  title="Click to add up to ${amount} to selected token(s) temp HP."
-                ></i></button
-            ></span>
-          </div>
-          <div class="dice-tooltip-collapser">
-            <div class="dice-tooltip">
-              <section class="tooltip-part">
-                <div class="dice">
-                  <ol class="dice-rolls">
-                    <li class="constant">${amount}</li>
-                  </ol>
-                  <div class="total">
-                    <img
-                      src="systems/dnd5e/icons/svg/damage/healing.svg"
-                      alt="Healing"
-                    />
-                    <span class="label">Healing</span>
-                    <span class="value">${amount}</span>
-                  </div>
-                </div>
-              </section>
-            </div>
-          </div>
-          <h4 class="dice-total">${amount}</h4>
-        </div>
-      </div>
-    </div>
-      <div class="end-midi-qol-saves-display"></div>
-    </div>
-  </div>
-</div>
-`;
-};
-
 const casterActor = item.actor;
-const layOnHandsPool = casterActor.items.find(
-  (i) => i.name === "Lay on Hands Pool"
-);
+const layOnHandsPool = casterActor.items.find((i) => i.name === "Lay On Hands");
 
 const currentCharges = layOnHandsPool.system.uses.value;
 const maxCharges = layOnHandsPool.system.uses.max;
@@ -147,7 +27,7 @@ new Dialog({
           .object;
         const chargesToUse = formData.charges;
 
-        if (chargesToUse < 0) {
+        if (chargesToUse <= 0) {
           ui.notifications.warn(
             `Invalid number of charges specified: ${chargesToUse}...`
           );
@@ -162,7 +42,7 @@ new Dialog({
         }
 
         ChatMessage.create({
-          content: getMessageContent(chargesToUse, target.name),
+          content: `<p>Healing <span style="font-weight:bold">${target.name}</span> for ${chargesToUse} HP</p>`,
           speaker: ChatMessage.getSpeaker(casterActor),
         });
 
@@ -176,7 +56,39 @@ new Dialog({
           .play();
 
         await layOnHandsPool.update({
-          system: { uses: { value: currentCharges - chargesToUse } },
+          system: {
+            uses: { spent: layOnHandsPool.system.uses.spent + chargesToUse },
+          },
+        });
+      },
+    },
+    curePoison: {
+      label: "Cure Poison",
+      icon: "",
+      callback: async () => {
+        if (5 > currentCharges) {
+          ui.notifications.warn(
+            `Cannot cure poison. Only ${currentCharges} charges remaining...`
+          );
+          return;
+        }
+
+        ChatMessage.create({
+          content: `<p>Curing poison on <span style="font-weight:bold">${target.name}</span>, using 5 charges</p>`,
+          speaker: ChatMessage.getSpeaker(casterActor),
+        });
+
+        new Sequence()
+          .effect()
+          .file("jb2a.cure_wounds.200px.purple")
+          .atLocation(target.center)
+          .scaleToObject(1.5)
+          .duration(3000)
+          .opacity(0.75)
+          .play();
+
+        await layOnHandsPool.update({
+          system: { uses: { spent: layOnHandsPool.system.uses.spent + 5 } },
         });
       },
     },
